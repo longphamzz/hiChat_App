@@ -2,6 +2,7 @@ import { useChatStore } from '@/stores/useChatStore'
 import ChatWelcomeScreen from './ChatWelcomeScreen';
 import MessageItem from './MessageItem';
 
+
 const ChatWindowBody = () => {
   const { activeConversationId, conversations, messages: allMessages } = useChatStore();
 
@@ -28,7 +29,7 @@ const ChatWindowBody = () => {
             message={message} index={index}
             messages={messages}
             selectedConvo={selectedConvo}
-            lastMessageStatus='seen' />
+            lastMessageStatus='delivered' />
 
         ))}
       </div>

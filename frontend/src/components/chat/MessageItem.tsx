@@ -1,9 +1,9 @@
 import type { Conversation, Participant } from "@/types/chat";
-import type { Message } from "react-hook-form";
+import type { Message } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
-import { formatMessageTime } from "@/lib/utils";
-import { Badge } from "lucide-react";
+import { cn, formatMessageTime } from "@/lib/utils";
+import { Badge } from "../ui/badge";
 
 
 interface MessageItemProps {
@@ -24,12 +24,12 @@ const MessageItem = ({message, index, messages, selectedConvo, lastMessageStatus
 
  
         return (
-    <div className={cn("flex gap-2 message-bounce",message.isOwn? "justify-end" : "justify-start")}>
+    <div className={cn("flex gap-2 message-bounce mt-1.5",message.isOwn? "justify-end" : "justify-start")}>
         {/* avatar  */}
         {!message.isOwn && (
             <div className="w-8">
                 {isGroupBreak && (
-                    <UserAvatar type="chat" name="participant?.displayName" avatarUrl={participant?.avatarUrl ?? undefined} />
+                    <UserAvatar type="chat" name={participant?.displayName ?? ""} avatarUrl={participant?.avatarUrl ?? undefined} />
 
                 )}
             </div>
@@ -38,11 +38,11 @@ const MessageItem = ({message, index, messages, selectedConvo, lastMessageStatus
 
         {/* mess  */}
         <div className={cn("max-w-xs lg:max-w-md space-y-1 flex flex-col",message.isOwn ? "items-end" : "items-start")}>
-            <Card className={cn("p-3", message.isOwn ? " chat-bubble-sent border-0" : "bg-chat-bubble-received")}>
+            <Card className={cn("p-3", message.isOwn ? "chat-bubble-sent border-0" : "bg-chat-bubble-received")}>
 
                 <p className="text-sm leading-relaxed break-words">
-                    {messages.content}
-                </p>
+                    {message.content}
+                </p> 
             </Card>
 
 
@@ -55,7 +55,7 @@ const MessageItem = ({message, index, messages, selectedConvo, lastMessageStatus
 
         {/* check  */}
         {message.isOwn && message._id === selectedConvo.lastMessage?._id && (
-            <Badge varient='outline' className={cn("text-xs px-1 py-1 border-0", lastMessageStatus ==='seen' ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")} >
+            <Badge variant='outline' className={cn("text-xs px-1 py-1 border-0", lastMessageStatus ==='seen' ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")} >
                 {lastMessageStatus} 
             </Badge>
         )}
