@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const friendRequestSchema = new mongoose.Schema( {
     from: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: " User",
+        ref: "User",
         required: true
     },
     to: {

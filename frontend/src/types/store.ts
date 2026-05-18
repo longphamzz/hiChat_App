@@ -9,18 +9,18 @@ export interface AuthState {
     loading: boolean;
 
 
-        setAccessToken:  (accessToken: string) => void;
+    setAccessToken: (accessToken: string) => void;
     clearState: () => void;
 
-   
+
     signUp: (username: string, password: string, email: string, firstName: string, lastName: string) => Promise<void>;
 
-    signIn:(username:string, password: string) => Promise<void>;
+    signIn: (username: string, password: string) => Promise<void>;
 
-    signOut: () =>  Promise<void>;
+    signOut: () => Promise<void>;
 
     fetchMe: () => Promise<void>;
-    
+
     refresh: () => Promise<void>;
 }
 
@@ -45,21 +45,23 @@ export interface ChatState {
     setActiveConversation: (id: string | null) => void;
     fetchConversations: () => Promise<void>;
     fetchMessages: (ConversationId?: string) => Promise<void>;
-    sendDirectMessage:(
+    sendDirectMessage: (
         recipientId: string,
         content: string,
         imgUrl?: string
     ) => Promise<void>;
     sendGroupMessage: (
         conversationId: string,
-        content:string,
+        content: string,
         imgUrl?: string
     ) => Promise<void>
     //add message
     addMessage: (message: Message) => Promise<void>;
 
     //update convo
-    updateConversation: (conversation: Conversation) => void;
+    updateConversation: (conversation: unknown) => void;
+
+    markAsSeen: () => Promise<void>;
 
 }
 

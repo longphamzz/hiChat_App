@@ -1,5 +1,6 @@
 import Conversation from "../models/Conversation.js";
 import Message from "../models/Message.js";
+import { io } from "../socket/index.js";
 
 
 export const createConversation = async (req, res) => {
@@ -158,4 +159,54 @@ export const getUserConversationsForSocketIO = async (userId) => {
         return [];
         
     }
+}
+
+export const markAsSeen = async (req, res) => {
+try {
+    const {conversationId} = req.params;
+    const userId = req.user._id.toString();
+
+    const conversation = await Conversation.findById(conversationId).lean();
+
+    if (!conversation) {
+        return res.status(404).json({message: "Cuộc trò chuyện không tồn tại"})
+    }
+
+    const last = conversation.lastMessage;
+
+    if (!last) {
+        return res.status(400).json({message: "Cuộc trò chuyện chưa có tin nhắn "})
+    }
+
+    if(last.senderId.toString() === userId) {
+        return res.status(400).json({message: "Bạn không thể đánh dấu tin nhắn của chính mình là đã xem"})
+    }
+
+    const updated = await Conversation.findByIdAndUpdate(conversationId, {
+        $addToSet: {seenBy: userId},
+        $set: {[`unreadCounts.${userId}`]: 0}
+    }, {new: true})
+
+    io.to(conversationId).emit("read-message", {
+        conversation: updated,
+        lastMessage: {
+            _id: updated.lastMessage._id,
+            content: updated.lastMessage.content,
+            createdAt: updated.lastMessage.createdAt,
+            senderId: {
+                _id: updated.lastMessage.senderId._id,
+               
+            }
+
+        }
+    })
+
+    return res.status(200).json({message: "Đã đánh dấu là đã xem", seenBy: updated.seenBy || [], myUnreadCount: updated?.unreadCounts[userId] || 0,})
+
+} catch (error) {
+    console.error("Lỗi khi đánh dấu đã xem", error);
+    return res.status(500).json({message: "Lỗi hệ thống"})
+    
+    
+}
 }

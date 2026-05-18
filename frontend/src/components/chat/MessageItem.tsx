@@ -15,7 +15,7 @@ interface MessageItemProps {
 }
 
 const MessageItem = ({message, index, messages, selectedConvo, lastMessageStatus} : MessageItemProps) => {
-    const prev = messages[index -1];
+    const prev = index + 1 < messages.length ? messages[index + 1] : undefined;
     const isGroupBreak = index === 0 ||
         message.senderId !== prev?.senderId ||
         new Date(message.createdAt).getTime() - new Date(prev?.createdAt || 0 ).getTime() > 30000;
