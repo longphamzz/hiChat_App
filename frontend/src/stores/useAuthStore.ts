@@ -2,7 +2,6 @@ import { create } from 'zustand'
 import { toast } from 'sonner'
 import type { AuthState } from '@/types/store'
 import { authService } from '@/services/authService'
-import { fi } from 'zod/v4/locales'
 import {persist} from 'zustand/middleware';
 import { useChatStore } from './useChatStore'
 
@@ -16,10 +15,16 @@ export const useAuthStore = create<AuthState>()(
         set({accessToken})
     },
 
+    setUser: (user) => {
+        set({user});
+    },
+
     clearState: () => {
         set({ accessToken: null, user: null, loading: false })
-        localStorage.clear();
+        
         useChatStore.getState().reset();
+        localStorage.clear();
+        sessionStorage.clear();
     },
 
     signUp: async (username, password, email, firstName, lastName) => {
@@ -39,21 +44,27 @@ export const useAuthStore = create<AuthState>()(
 
     signIn: async (username, password) => {
         try {
+            get().clearState();
             set({ loading: true })
 
             localStorage.clear();
             useChatStore.getState().reset();
 
             const { accessToken } = await authService.signIn(username, password)
+            if (!accessToken) {
+                throw new Error("Đăng nhập thất bại, không nhận được access token")
+            }
             get().setAccessToken(accessToken)
 
             await get().fetchMe();
             useChatStore.getState().fetchConversations();  
 
             toast.success("Chào mừng bạn trở lại")
+            return true;
         } catch (error) {
             console.error(error);
             toast.error('Đăng nhập không thành công')
+             return false;
         } finally {
             set({ loading: false })
         }
@@ -99,7 +110,7 @@ export const useAuthStore = create<AuthState>()(
                 await fetchMe()
             }
         } catch (error) {
-            console.error();
+            console.error(error);
             toast.error("Phiên đăng nhập đã hết hạn")
             get().clearState();
 

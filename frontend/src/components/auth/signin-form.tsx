@@ -21,20 +21,23 @@ type SignInFormValues = z.infer<typeof signinSchema>;
 export function SigninForm({
   className,
   ...props
-}: React.ComponentProps<"div">){
-  const {signIn} = useAuthStore();
-  const navigate = useNavigate(); 
-     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
-        resolver: zodResolver(signinSchema)
-      });
-      const onSubmit = async (data: SignInFormValues) => {
-    const {username, password} = data;
-    await signIn(username,password);
-    navigate('/');
-      }
+}: React.ComponentProps<"div">) {
+  const { signIn } = useAuthStore();
+  const navigate = useNavigate();
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
+    resolver: zodResolver(signinSchema)
+  });
+  
+  const onSubmit = async (data: SignInFormValues) => {
+    const { username, password } = data;
+    const success = await signIn(username, password);
+    if (success) {
+      navigate('/');
+    }
+  }
 
 
-      
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="overflow-hidden p-0">
@@ -52,7 +55,7 @@ export function SigninForm({
                 </p>
               </div>
 
-             
+
 
               {/* username */}
               <div className="flex flex-col gap-3">
@@ -65,7 +68,7 @@ export function SigninForm({
                   </p>
                 )}
               </div>
-              
+
               {/* password */}
               <div className="flex flex-col gap-3">
                 <Label htmlFor="password" className="block text-sm">Mật khẩu</Label>
@@ -106,5 +109,5 @@ export function SigninForm({
     </div>
   )
 
-    
+
 }

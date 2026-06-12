@@ -27,9 +27,9 @@ import { useAuthStore } from "@/stores/useAuthStore"
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
- const {isDark, toggleTheme} = useThemeStore();
- const {user} = useAuthStore();
- 
+  const { isDark, toggleTheme } = useThemeStore();
+  const { user } = useAuthStore();
+
   return (
     <Sidebar variant="inset" {...props}>
 
@@ -73,13 +73,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
         {/* GroupChat */}
         <SidebarGroup>
-          <SidebarGroupLabel className="uppercase">
-            Nhóm chat
-          </SidebarGroupLabel>
 
-          <SidebarGroupAction title="Tạo nhóm" className="cursor-pointer">
+
+          <div className="flex items-center justify-between">
+            <SidebarGroupLabel className="uppercase">
+              Nhóm chat
+            </SidebarGroupLabel>
             <NewGroupChatModel />
-          </SidebarGroupAction>
+          </div>
+
           <SidebarGroupContent>
 
             <GroupChatList />
@@ -97,11 +99,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroupLabel>
 
           <SidebarGroupAction title="Kết Bạn" className="cursor-pointer">
-            <AddFriendModal/>
+            <AddFriendModal />
           </SidebarGroupAction>
           <SidebarGroupContent>
 
-            <DirectMessageList/>
+            <DirectMessageList />
           </SidebarGroupContent>
 
         </SidebarGroup>
@@ -113,8 +115,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       {/*  */}
       <SidebarFooter>
-        {user && 
-        <NavUser user={user} />}
+        {user &&
+          <NavUser user={user} />}
       </SidebarFooter>
     </Sidebar>
   )

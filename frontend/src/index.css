@@ -285,6 +285,15 @@
            border border-border/50;
   }
 
+  .error-message {
+    @apply text-sm text-destructive;
+  }
+
+  .success-message {
+    @apply text-sm text-green-600;
+  }
+
+
   /* Status */
   .status-online {
     @apply bg-[hsl(var(--online))]
