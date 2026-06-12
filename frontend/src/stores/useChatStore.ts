@@ -199,31 +199,31 @@ export const useChatStore = create<ChatState>()(
                 }
             },
 
-             addConvo: async (convo) => {
-                    set((state) => {
-                        const exists = state.conversations.some((c) => c._id.toString() === convo._id.toString());
+            addConvo: async (convo) => {
+                set((state) => {
+                    const exists = state.conversations.some((c) => c._id.toString() === convo._id.toString());
 
-                        return {
-                            conversations: exists ? state.conversations : [convo, ...state.conversations],
-                            activeConversationId: convo._id,
-                        }
-                    })
-             },
+                    return {
+                        conversations: exists ? state.conversations : [convo, ...state.conversations],
+                        activeConversationId: convo._id,
+                    }
+                })
+            },
 
-             createConversation: async (type, name, memberIds) => {
+            createConversation: async (type, name, memberIds) => {
                 try {
-                    set({loading: true})
-                    const conversation = await chatService.createConversation(type, name , memberIds);
-                    
+                    set({ loading: true })
+                    const conversation = await chatService.createConversation(type, name, memberIds);
+
                     get().addConvo(conversation);
 
                     useSocketStore.getState().socket?.emit("join-conversation", conversation._id)
                 } catch (error) {
                     console.error("Lỗi xảy ra khi tạo cuộc trò chuyện", error)
                 } finally {
-                    set({loading: false})
+                    set({ loading: false })
                 }
-              }
+            }
 
         }),
         {

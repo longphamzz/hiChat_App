@@ -35,7 +35,10 @@ io.on("connection", async (socket) => {
 
     socket.on("join-conversation", (conversationId) => { 
         socket.join(conversationId);
+        console.log(`User ${user.displayName} joined new room: ${conversationId}`);
     });
+   
+
 
     socket.join(user._id.toString());
 

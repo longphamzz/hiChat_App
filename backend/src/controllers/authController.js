@@ -97,7 +97,7 @@ export const signIn = async (req, res) =>{
     }
 };
 
-export const SignOut = async (req, res) => {
+export const signOut = async (req, res) => {
     try {
         // lấy refresh token từ cookie
         const token = req.cookies?.refreshToken;

@@ -8,7 +8,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "@/stores/useAuthStore"
 import { useNavigate } from "react-router"
-
+import { Link } from "react-router";
 
 const signinSchema = z.object({
   username: z.string().min(2, "Tên đăng nhập phải có ít nhất 2 ký tự"),
@@ -27,7 +27,7 @@ export function SigninForm({
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignInFormValues>({
     resolver: zodResolver(signinSchema)
   });
-  
+
   const onSubmit = async (data: SignInFormValues) => {
     const { username, password } = data;
     const success = await signIn(username, password);
@@ -87,16 +87,19 @@ export function SigninForm({
 
               <div className="text-center text-sm">
                 Bạn chưa đã có tài khoản?{" "}
-                <a href="/signup" className="underline underline-offset-4">
-                  Đăng ký
-                </a>
+                <Link
+                  to="/signup"
+                  className="underline underline-offset-4"
+                >
+                  Đăng Ký
+                </Link>
               </div>
             </div>
           </form>
-          <div className="relative hidden bg-muted md:block">
+          <div className="relative hidden bg-muted md:block overflow-hidden">
             <img
-              src="/placeholder.svg"
-              alt="Image"
+              src="/signin.jpg"
+              alt="Sign In"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
           </div>

@@ -11,59 +11,57 @@ import { useSocketStore } from '@/stores/useSocketStore';
 const DirectMessageCard = ({ convo }: { convo: Conversation }) => {
     const { user } = useAuthStore();
     const { activeConversationId, setActiveConversation, messages, fetchMessages } = useChatStore();
-    const { onlineUsers} = useSocketStore() ;
+    const { onlineUsers } = useSocketStore();
 
     if (!user) return null;
 
     const otherUser = convo.participants.find((p) => p._id !== user._id);
     if (!otherUser) return null;
 
-    const unreadCount = convo.unreadCounts[user._id];
+    const unreadCount = convo.unreadCounts?.[user._id] ?? 0;
     const lastMessage = convo.lastMessage?.content ?? "";
 
 
     const handleSelectConversation = async (id: string) => {
         setActiveConversation(id);
         if (!messages[id]) {
-//todo 
-await  fetchMessages();
+            //todo 
+            await fetchMessages();
 
         }
     }
 
     return (
-        <ChatCard 
-        convoId = {convo._id}
-        name={otherUser.displayName ?? ""}
-        timestamp={
-            convo.lastMessage?.createdAt ? new Date(convo.lastMessage.createdAt) : undefined
-        }
-        isActive={ activeConversationId === convo._id}
-        onSelect={handleSelectConversation}
-        unreadCount={unreadCount}
-        leftSection= {
-            <>
-            {/* todo: user avatar */}
-            <UserAvatar type='sidebar' name={otherUser.displayName ?? ""}
-                avatarUrl={otherUser.avatarUrl ?? undefined}
-            />
-            {/* socket io  */}
-            <StatusBadge status={onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"} />
-            {
-                unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />
+        <ChatCard
+            convoId={convo._id}
+            name={otherUser.displayName ?? ""}
+            timestamp={
+                convo.lastMessage?.createdAt ? new Date(convo.lastMessage.createdAt) : undefined
             }
-            {/* todo: status badge */}
+            isActive={activeConversationId === convo._id}
+            onSelect={handleSelectConversation}
+            unreadCount={unreadCount}
+            leftSection={
+                <>
+                    {/* todo: user avatar */}
+                    <UserAvatar type='sidebar' name={otherUser.displayName ?? ""}
+                        avatarUrl={otherUser.avatarUrl ?? undefined}
+                    />
+                    {/* socket io  */}
+                    <StatusBadge status={onlineUsers.includes(otherUser?._id ?? "") ? "online" : "offline"} />
+                    {
+                        unreadCount > 0 && <UnreadCountBadge unreadCount={unreadCount} />
+                    }
 
-            {/* todo unread count  */}
 
-            </>
-        }
+                </>
+            }
 
-        subtitle= {
-            <p className={cn("text-sm truncate", unreadCount > 0 ? " font-medium text-foreground" : " text-muted-foreground")}>
-                {lastMessage}
-            </p>
-        }
+            subtitle={
+                <p className={cn("text-sm truncate", unreadCount > 0 ? " font-medium text-foreground" : " text-muted-foreground")}>
+                    {lastMessage}
+                </p>
+            }
         />
     )
 }

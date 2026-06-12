@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "@/stores/useAuthStore"
 import { useNavigate } from "react-router"
+import { Link } from "react-router";
 
 const signupSchema = z.object({
   firstname: z.string().min(2, "Tên phải có ít nhất 2 ký tự"),
@@ -23,13 +24,13 @@ export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const {signUp} = useAuthStore();
+  const { signUp } = useAuthStore();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignUpFormValues>({
     resolver: zodResolver(signupSchema)
   });
   const onSubmit = async (data: SignUpFormValues) => {
-    const {firstname, lastname, username, email, password} = data;
+    const { firstname, lastname, username, email, password } = data;
 
     await signUp(username, password, email, firstname, lastname);
 
@@ -38,8 +39,8 @@ export function SignupForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden p-0">
-        <CardContent className="grid p-0 md:grid-cols-2">
+      <Card className="overflow-hidden p-0 shadow-2xl border-0">
+       <CardContent className="grid min-h-[700px] p-0 md:grid-cols-2">
           <form className="p-6 md:p-8" onSubmit={handleSubmit(onSubmit)}>
             <div className="flex flex-col gap-6">
               {/* header - logo  */}
@@ -118,15 +119,18 @@ export function SignupForm({
 
               <div className="text-center text-sm">
                 Bạn đã có tài khoản?{" "}
-                <a href="/signin" className="underline underline-offset-4">
+                <Link
+                  to="/signin"
+                  className="underline underline-offset-4"
+                >
                   Đăng nhập
-                </a>
+                </Link>
               </div>
             </div>
           </form>
           <div className="relative hidden bg-muted md:block">
             <img
-              src="/placeholder.svg"
+              src="/signup.jpg"
               alt="Image"
               className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
             />
