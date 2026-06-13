@@ -52,7 +52,13 @@ const MessageItem = ({
   const [editContent, setEditContent] = useState(message.content ?? "");
   return (
     <>
-     
+      {message.system ? (
+        <div className="w-full flex items-center justify-center my-3">
+          <div className="text-xs text-muted-foreground bg-muted/20 px-3 py-1 rounded-lg">
+            {message.content}
+          </div>
+        </div>
+      ) : (
 
       <div
         className={cn(
@@ -158,7 +164,8 @@ const MessageItem = ({
             </Badge>
           )}
         </div>
-      </div>
+        </div>
+        )}
 
       {/* Edit dialog */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>

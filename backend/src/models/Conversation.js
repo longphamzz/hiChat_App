@@ -29,6 +29,14 @@ const groupSchema = new mongoose.Schema({
     _id: false
 })
 
+// add admins list to support group admin permissions
+groupSchema.add({
+    admins: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
+});
+
 const lastMessageSchema = new mongoose.Schema({
     _id: {type: String},
     content: {

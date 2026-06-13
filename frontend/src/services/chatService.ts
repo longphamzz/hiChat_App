@@ -68,6 +68,16 @@ export const chatService = {
     async createConversation (type: 'direct' | 'group', name: string, memberIds : string[]){
         const res = await api.post('/conversations', {type,name, memberIds});
         return res.data.conversation;
+    },
+
+    async addMembersToConversation(conversationId: string, memberIds: string[]) {
+        const res = await api.post(`/conversations/${conversationId}/add-members`, { memberIds });
+        return res.data;
+    }
+,
+    async removeMembersFromConversation(conversationId: string, memberIds: string[]) {
+        const res = await api.post(`/conversations/${conversationId}/remove-members`, { memberIds });
+        return res.data;
     }
 
 

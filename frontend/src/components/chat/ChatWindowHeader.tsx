@@ -10,6 +10,7 @@ import { useSocketStore } from '@/stores/useSocketStore';
 import { Button } from '../ui/button';
 import { PhoneCall, Video } from 'lucide-react';
 import { useCall } from '@/contexts/CallContext';
+import SettingGroupChatDialog from './SettingGroupChatDialog';
 
 
 const ChatWindowHeader = ({chat} : {chat? : Conversation}) => {
@@ -82,6 +83,23 @@ const ChatWindowHeader = ({chat} : {chat? : Conversation}) => {
               <Video />
             </Button>
           </div>
+        )}
+        {chat.type === 'group' && (
+          // show Add Member button only for admins
+          (() => {
+            const userId = user?._id?.toString();
+            const createdBy = String(chat.group?.createdBy || '');
+            const admins = (chat.group?.admins || []).map((a: any) => String(a));
+            const isAdmin = userId && (userId === createdBy || admins.includes(userId));
+
+            if (!isAdmin) return null;
+
+            return (
+              <div className='ml-auto'>
+                <SettingGroupChatDialog conversationId={chat._id} />
+              </div>
+            )
+          })()
         )}
     </div>
 

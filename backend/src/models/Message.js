@@ -39,6 +39,11 @@ const messageSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    // system message (e.g. "X added Y to the group")
+    system: {
+        type: Boolean,
+        default: false,
+    },
 } ,  {
     timestamps: true
 }
