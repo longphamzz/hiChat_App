@@ -17,6 +17,26 @@ const ChatWindowBody = () => {
 
   const messages = allMessages[activeConversationId!]?.items ?? [];
   const reversedMessages = [...messages].reverse();
+  // compute showTime flags so timestamps appear every 10 minutes since last shown
+  const threshold = 10 * 60 * 1000; // 10 minutes in ms
+  const showFlagsChrono: boolean[] = [];
+  // messages is chronological (oldest -> newest)
+  let lastShownAt: number | null = null;
+  for (let i = 0; i < messages.length; i++) {
+    const t = new Date(messages[i].createdAt).getTime();
+    if (lastShownAt === null) {
+      showFlagsChrono.push(true);
+      lastShownAt = t;
+    } else {
+      if (t - lastShownAt >= threshold) {
+        showFlagsChrono.push(true);
+        lastShownAt = t;
+      } else {
+        showFlagsChrono.push(false);
+      }
+    }
+  }
+  const reversedShowFlags = showFlagsChrono.length ? [...showFlagsChrono].reverse() : [];
   const hasMore = allMessages[activeConversationId!]?.hasMore ?? false;
   const selectedConvo = conversations.find((c) => c._id === activeConversationId);
   const key = `chat-scroll-${activeConversationId}`;
@@ -127,6 +147,7 @@ const ChatWindowBody = () => {
               messages={reversedMessages}
               selectedConvo={selectedConvo}
               lastMessageStatus={lastMessageStatus}
+              showTime={reversedShowFlags[index] ?? false}
             />
           ))}
         </InfiniteScroll>

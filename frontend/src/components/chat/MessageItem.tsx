@@ -11,6 +11,7 @@ interface MessageItemProps {
   messages: Message[];
   selectedConvo: Conversation;
   lastMessageStatus: "delivered" | "seen";
+  showTime?: boolean;
 }
 
 const MessageItem = ({
@@ -19,14 +20,17 @@ const MessageItem = ({
   messages,
   selectedConvo,
   lastMessageStatus,
+  showTime,
 }: MessageItemProps) => {
   const prev = index + 1 < messages.length ? messages[index + 1] : undefined;
 
+  // use showTime prop calculated in parent (based on chronological spacing)
   const isShowTime =
-    index === 0 ||
-    new Date(message.createdAt).getTime() -
-      new Date(prev?.createdAt || 0).getTime() >
-      300000; // 5 phút
+    showTime ??
+    (index === 0 ||
+      new Date(message.createdAt).getTime() -
+        new Date(prev?.createdAt || 0).getTime() >
+        600000);
 
   const isGroupBreak = isShowTime || message.senderId !== prev?.senderId;
 

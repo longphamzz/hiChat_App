@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/useAuthStore'
 import type { Conversation } from '@/types/chat';
 import React, { useRef, useState } from 'react'
 import { Button } from '../ui/button';
-import { ImagePlus, Send } from 'lucide-react';
+import { ImagePlus, Mic, Send } from 'lucide-react';
 import { Input } from '../ui/input';
 import EmojiPicker from './EmojiPicker';
 import { useChatStore } from '@/stores/useChatStore';
@@ -85,6 +85,10 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
         <input ref={fileInputRef} onChange={handleFileChange} type='file' className='hidden' />
         <Button onClick={handleFileClick} variant='ghost' size='icon' className='hover:bg-primary/10 transiton-smooth' disabled={uploading} aria-busy={uploading} >
           <ImagePlus className='size-4' />
+        </Button>
+
+        <Button variant='ghost' size='icon' className='hover:bg-primary/10 transiton-smooth'>
+          <Mic />
         </Button>
       </>
       <div className='flex-1 relative'>
