@@ -1,12 +1,13 @@
 import { useAuthStore } from '@/stores/useAuthStore'
 import type { Conversation } from '@/types/chat';
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Button } from '../ui/button';
 import { ImagePlus, Send } from 'lucide-react';
 import { Input } from '../ui/input';
 import EmojiPicker from './EmojiPicker';
 import { useChatStore } from '@/stores/useChatStore';
 import { toast } from 'sonner';
+import { chatService } from '@/services/chatService';
 
 
 
@@ -15,6 +16,8 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   const { user } = useAuthStore();
   const {sendDirectMessage, sendGroupMessage} = useChatStore();
   const [value, setValue] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
 
   if (!user) return;
@@ -38,6 +41,36 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     } 
   }
 
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const res = await chatService.uploadAttachment(file);
+      const url = res.url || res.secure_url || res.data?.url;
+
+      if (selectedConvo.type === 'direct') {
+        const participants = selectedConvo.participants;
+        const otherUser = participants.filter((p) => p._id !== user._id)[0];
+        await sendDirectMessage(otherUser._id, "", url);
+      } else {
+        await sendGroupMessage(selectedConvo._id, "", url);
+      }
+
+    } catch (error) {
+      console.error(error);
+      toast.error('Có lỗi khi upload file');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  }
+
  const handleKeyPress = (e: React.KeyboardEvent) => {
     if(e.key === 'Enter') {
       e.preventDefault();
@@ -48,10 +81,12 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   return (
 
     <div className='flex items-center gap-2 p-3 min-h-[56px] bg-background'>
-      <Button variant='ghost' size='icon' className='hover:bg-primary/10 transiton-smooth' >
-
-        <ImagePlus className='size-4' />
-      </Button>
+      <>
+        <input ref={fileInputRef} onChange={handleFileChange} type='file' className='hidden' />
+        <Button onClick={handleFileClick} variant='ghost' size='icon' className='hover:bg-primary/10 transiton-smooth' disabled={uploading} aria-busy={uploading} >
+          <ImagePlus className='size-4' />
+        </Button>
+      </>
       <div className='flex-1 relative'>
         <Input  onKeyPress={handleKeyPress}
         value={value} onChange={(e) => setValue(e.target.value)}

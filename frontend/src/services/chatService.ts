@@ -34,6 +34,17 @@ export const chatService = {
         return res.data.message
     },
 
+    async uploadAttachment(file: File) {
+        const form = new FormData();
+        form.append('file', file);
+
+        const res = await api.post('/messages/upload', form, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+
+        return res.data;
+    },
+
     async markAsSeen(conversationId: string) {
         const res = await api.patch(`/conversations/${conversationId}/seen`);
         return res.data;

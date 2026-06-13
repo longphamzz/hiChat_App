@@ -27,3 +27,21 @@ export const uploadImageFromBuffer = (buffer, options) => {
     uploadStream.end(buffer)
     })
 }
+
+export const uploadFileFromBuffer = (buffer, options) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream({
+            folder: "chatapp/attachments",
+            resource_type: "auto",
+            ...options,
+        }, (error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+
+        uploadStream.end(buffer);
+    });
+}

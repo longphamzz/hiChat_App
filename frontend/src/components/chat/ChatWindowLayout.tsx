@@ -1,6 +1,5 @@
 import { useChatStore } from "@/stores/useChatStore"
 import ChatWelcomeScreen from "./ChatWelcomeScreen";
-import ChatWindowSkeleton from "./ChatWindowSkeleton";
 import { SidebarInset } from "../ui/sidebar";
 import ChatWindowHeader from "./ChatWindowHeader";
 import ChatWindowBody from "./ChatWindowBody";
@@ -35,10 +34,6 @@ const ChatWindowLayout = () => {
     return <ChatWelcomeScreen />
   }
 
-  if(loading) {
-    return <ChatWindowSkeleton />
-  }
-  
 
   return (
    <SidebarInset className="flex flex-col h-full flex-1 overflow-hidden rounded-sm shadow-md">

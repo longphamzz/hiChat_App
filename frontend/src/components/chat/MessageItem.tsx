@@ -3,6 +3,7 @@ import type { Conversation, Message, Participant } from "@/types/chat";
 import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
+import { MessageAttachment } from "./MessageAttachment";
 
 interface MessageItemProps {
   message: Message;
@@ -69,7 +70,16 @@ const MessageItem = ({
               message.isOwn ? "chat-bubble-sent border-0" : "chat-bubble-received"
             )}
           >
-            <p className="text-sm leading-relaxed break-words">{message.content}</p>
+            {message.imgUrl ? (
+              <div className="space-y-2">
+                <MessageAttachment url={message.imgUrl} />
+                {message.content && (
+                  <p className="text-sm leading-relaxed break-words">{message.content}</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm leading-relaxed break-words">{message.content}</p>
+            )}
           </Card>
 
           {/* seen/ delivered */}

@@ -21,7 +21,7 @@ export const updateConversationAfterCreateMessage = (conversation, message, send
 
 export const emitNewMessage = (io, conversation, message) => {
 
-    io.to(conversation._id.toString()).emit("new-message", {
+    const payload = {
         message,
         conversation: {
             _id: conversation._id,
@@ -29,5 +29,28 @@ export const emitNewMessage = (io, conversation, message) => {
             lastMessageAt: conversation.lastMessageAt,
         },
         unreadCounts: conversation.unreadCounts,
+    }
+
+    // Emit to conversation room (for users who already joined)
+    io.to(conversation._id.toString()).emit("new-message", payload);
+    console.log(`emit new-message to convo room ${conversation._id}`);
+
+    // Also emit to each participant personal room to ensure users who haven't
+    // joined the conversation yet (e.g., first message) still receive update.
+    (conversation.participants || []).forEach((p) => {
+        // p.userId may be an ObjectId or a populated user document
+        let memberId;
+        if (p && p.userId) {
+            if (p.userId._id) memberId = p.userId._id.toString();
+            else memberId = p.userId.toString();
+        } else {
+            memberId = p.toString();
+        }
+
+        // send to personal room
+        const room = io.sockets.adapter.rooms.get(memberId);
+        console.log(`personal room ${memberId} has sockets: ${room ? room.size : 0}`);
+        io.to(memberId).emit('new-message', payload);
+        console.log(`emit new-message to personal room ${memberId}`);
     })
 }
