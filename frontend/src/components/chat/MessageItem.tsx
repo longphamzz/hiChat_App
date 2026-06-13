@@ -130,11 +130,15 @@ const MessageItem = ({
                 <div className={message.content ? 'space-y-2' : ''}>
                   <MessageAttachment url={message.imgUrl} />
                   {message.content && (
-                    <p className="text-sm leading-relaxed break-all">{message.content}</p>
+                    <p className={message.unsent ? "text-sm leading-relaxed break-all italic text-muted-foreground/80" : "text-sm leading-relaxed break-all"}>
+                      {message.content}
+                    </p>
                   )}
                 </div>
               ) : (
-                <p className="text-sm leading-relaxed break-all">{message.content}{message.edited && <span className="text-xs text-muted-foreground"> (edited)</span>}</p>
+                <p className={message.unsent ? "text-sm leading-relaxed break-all italic text-muted-foreground/80" : "text-sm leading-relaxed break-all"}>
+                  {message.content}{message.edited && <span className="text-xs text-muted-foreground"> (edited)</span>}
+                </p>
               )}
             </Card>
           </div>

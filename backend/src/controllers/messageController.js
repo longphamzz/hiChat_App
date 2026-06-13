@@ -215,7 +215,7 @@ export const unsendMessageForEveryone = async (req, res) => {
       return res.status(403).json({ message: 'Not allowed' });
     }
 
-    message.content = 'You unsent a message';
+    message.content = 'Tin nhắn đã bị xóa';
     message.unsent = true;
     message.edited = false;
     message.editedAt = undefined;

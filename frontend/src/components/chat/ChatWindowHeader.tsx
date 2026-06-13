@@ -7,6 +7,9 @@ import UserAvatar from './UserAvatar';
 import StatusBadge from './StatusBadge';
 import GroupChatAvatar from './GroupChatAvatar';
 import { useSocketStore } from '@/stores/useSocketStore';
+import { Button } from '../ui/button';
+import { PhoneCall, Video } from 'lucide-react';
+import { useCall } from '@/contexts/CallContext';
 
 
 const ChatWindowHeader = ({chat} : {chat? : Conversation}) => {
@@ -34,8 +37,10 @@ const ChatWindowHeader = ({chat} : {chat? : Conversation}) => {
     if(!user || !otherUser) return;
   }
 
+  const call = useCall();
+
   return (
-  <header className='sticky top-0 z-10 px-4 py-2 flex items-center bg-background' >
+  <header className='sticky top-0 z-10 px-4 py-2 flex  items-center bg-background' >
     <div className='flex items-center gap-2 '>
 
       <SidebarTrigger className='-ml-1 text-foreground' />
@@ -68,6 +73,16 @@ const ChatWindowHeader = ({chat} : {chat? : Conversation}) => {
         <h2 className='font-semibold text-foreground'>
           {chat.type === "direct" ? otherUser?.displayName : chat.group?.name}
         </h2>
+        {chat.type === 'direct' && otherUser && (
+          <div className='ml-auto flex gap-2'>
+            <Button variant='ghost' onClick={() => { console.log('call voice clicked', otherUser._id); call.startCall(otherUser._id, 'voice'); }}>
+              <PhoneCall />
+            </Button>
+            <Button variant='ghost' onClick={() => { console.log('call video clicked', otherUser._id); call.startCall(otherUser._id, 'video'); }}>
+              <Video />
+            </Button>
+          </div>
+        )}
     </div>
 
   </header>
