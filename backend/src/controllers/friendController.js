@@ -3,6 +3,7 @@ import User from '../models/User.js';
 
 import Friend from '../models/Friend.js';
 import FriendRequest from '../models/FriendRequest.js';
+import { io } from '../socket/index.js';
 
 
 
@@ -55,6 +56,17 @@ export const sendFriendRequest = async (req, res) => {
                 to,
                 message
             });
+
+            // populate requester info for immediate client use
+            await request.populate({ path: 'from', select: '_id username displayName avatarUrl' });
+
+            // emit real-time event to recipient personal room
+            try {
+                io.to(to.toString()).emit('friend-request', request);
+                console.log(`emit friend-request to ${to.toString()}`);
+            } catch (e) {
+                console.error('Error emitting friend-request', e);
+            }
 
             return res.status(201).json({message: "Gửi lời mời kết bạn thành công", request }); 
 

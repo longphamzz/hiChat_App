@@ -3,7 +3,8 @@ import { io, type Socket } from 'socket.io-client';
 import { useAuthStore } from './useAuthStore';
 import type { SocketState } from '@/types/store';
 import { useChatStore } from './useChatStore';
-import { use } from 'react';
+import { useFriendStore } from './useFriendStore';
+
 
 const baseURL = import.meta.env.VITE_SOCKET_URL;
 
@@ -91,6 +92,16 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         socket.on("new-group", (conversation) => {
             useChatStore.getState().addConvo(conversation);
             socket.emit('join-conversation', conversation._id);
+        })
+
+        // friend request
+        socket.on('friend-request', async () => {
+            // refresh friend requests list so UI updates
+            try {
+                await useFriendStore.getState().getAllFriendRequests();
+            } catch (err) {
+                console.error('Failed to refresh friend requests after friend-request event', err);
+            }
         })
 
     },
