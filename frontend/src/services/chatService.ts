@@ -50,6 +50,21 @@ export const chatService = {
         return res.data;
     },
 
+    async editMessage(messageId: string, content: string) {
+        const res = await api.patch(`/messages/${messageId}`, { content });
+        return res.data.message;
+    },
+
+    async deleteMessageForMe(messageId: string) {
+        const res = await api.post(`/messages/${messageId}/delete-for-me`);
+        return res.data;
+    },
+
+    async unsendMessage(messageId: string) {
+        const res = await api.post(`/messages/${messageId}/unsend`);
+        return res.data.message;
+    },
+
     async createConversation (type: 'direct' | 'group', name: string, memberIds : string[]){
         const res = await api.post('/conversations', {type,name, memberIds});
         return res.data.conversation;

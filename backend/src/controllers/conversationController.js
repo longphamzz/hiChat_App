@@ -130,7 +130,11 @@ export const getMessages = async (req, res) => {
         const { conversationId } = req.params;
         const { limit = 50, cursor } = req.query;
 
+        const userId = req.user._id;
         const query = { conversationId };
+
+        // Exclude messages that were deleted by this user
+        query.deletedBy = { $ne: userId };
 
         if (cursor) {
             query.createdAt = { $lt: new Date(cursor) };

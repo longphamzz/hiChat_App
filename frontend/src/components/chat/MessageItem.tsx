@@ -4,6 +4,14 @@ import UserAvatar from "./UserAvatar";
 import { Card } from "../ui/card";
 import { Badge } from "../ui/badge";
 import { MessageAttachment } from "./MessageAttachment";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "../ui/dropdown-menu";
+import { MoreHorizontal, Edit3, Trash2, CornerUpLeft } from "lucide-react";
+import { Dialog, DialogContent, DialogTitle, DialogFooter, DialogHeader } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { useState } from "react";
+import { chatService } from "@/services/chatService";
+// socket/auth stores not directly used here
+import { useChatStore } from "@/stores/useChatStore";
 
 interface MessageItemProps {
   message: Message;
@@ -37,7 +45,11 @@ const MessageItem = ({
   const participant = selectedConvo.participants.find(
     (p: Participant) => p._id.toString() === message.senderId.toString()
   );
+  const chatStore = useChatStore.getState();
 
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editContent, setEditContent] = useState(message.content ?? "");
   return (
     <>
      
@@ -68,24 +80,64 @@ const MessageItem = ({
             message.isOwn ? "items-end" : "items-start"
           )}
         >
-          <Card
-            className={cn(
-              // if this message only contains an attachment, remove extra padding
-              message.imgUrl && !message.content ? 'p-0' : 'p-3',
-              message.isOwn ? "chat-bubble-sent border-0" : "chat-bubble-received"
-            )}
-          >
-            {message.imgUrl ? (
-              <div className={message.content ? 'space-y-2' : ''}>
-                <MessageAttachment url={message.imgUrl} />
-                {message.content && (
-                  <p className="text-sm leading-relaxed break-words">{message.content}</p>
-                )}
+          <div className="flex items-center group">
+            {/* three-dot button to the left of bubble (owner only) */}
+            {message.isOwn && (
+              <div className="mr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <DropdownMenu open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon-sm" className="h-8 w-8 p-1">
+                      <MoreHorizontal />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onSelect={() => { setIsEditOpen(true); setIsMenuOpen(false); }}>
+                      <Edit3 className="mr-2" /> Edit Message
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={async () => {
+                      setIsMenuOpen(false);
+                      try {
+                        await chatService.deleteMessageForMe(message._id);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}>
+                      <Trash2 className="mr-2" /> Delete For Me
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={async () => {
+                      setIsMenuOpen(false);
+                      try {
+                        await chatService.unsendMessage(message._id);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}>
+                      <CornerUpLeft className="mr-2" /> Unsend For Everyone
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-            ) : (
-              <p className="text-sm leading-relaxed break-words">{message.content}</p>
             )}
-          </Card>
+
+            <Card
+              className={cn(
+                // if this message only contains an attachment, remove extra padding
+                message.imgUrl && !message.content ? 'p-0' : 'p-3',
+                message.isOwn ? "chat-bubble-sent border-0" : "chat-bubble-received"
+              )}
+            >
+              {message.imgUrl ? (
+                <div className={message.content ? 'space-y-2' : ''}>
+                  <MessageAttachment url={message.imgUrl} />
+                  {message.content && (
+                    <p className="text-sm leading-relaxed break-all">{message.content}</p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm leading-relaxed break-all">{message.content}{message.edited && <span className="text-xs text-muted-foreground"> (edited)</span>}</p>
+              )}
+            </Card>
+          </div>
 
           {/* seen/ delivered */}
           {message.isOwn && message._id === selectedConvo.lastMessage?._id && (
@@ -103,6 +155,29 @@ const MessageItem = ({
           )}
         </div>
       </div>
+
+      {/* Edit dialog */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit message</DialogTitle>
+          </DialogHeader>
+          <textarea className="w-full h-28 p-2 mt-2 border rounded" value={editContent} onChange={(e) => setEditContent(e.target.value)} />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setIsEditOpen(false)}>Cancel</Button>
+            <Button onClick={async () => {
+              try {
+                const updated = await chatService.editMessage(message._id, editContent);
+                // store will be updated via socket event; also update optimistically
+                chatStore.updateMessage(updated);
+                setIsEditOpen(false);
+              } catch (err) {
+                console.error(err);
+              }
+            }}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
        {/* time */}
       {isShowTime && (

@@ -134,6 +134,11 @@ export const useChatStore = create<ChatState>()(
                     const { user } = useAuthStore.getState();
                     const { fetchMessages } = get();
 
+                    // if this message was deleted for current user, ignore
+                    if (message.deletedBy && Array.isArray(message.deletedBy) && message.deletedBy.includes(user?._id)) {
+                        return;
+                    }
+
                     message.isOwn = message.senderId === user?._id;
 
                     const convoId = message.conversationId;
@@ -174,6 +179,39 @@ export const useChatStore = create<ChatState>()(
 
 
                 }
+            },
+
+            updateMessage: (message) => {
+                const convoId = message.conversationId;
+                set((state) => {
+                    const items = state.messages[convoId]?.items ?? [];
+                    const updated = items.map((m) => (m._id === message._id ? { ...m, ...message } : m));
+                    return {
+                        messages: {
+                            ...state.messages,
+                            [convoId]: {
+                                ...state.messages[convoId],
+                                items: updated,
+                            },
+                        },
+                    };
+                });
+            },
+
+            removeMessageForUser: (conversationId, messageId) => {
+                set((state) => {
+                    const items = state.messages[conversationId]?.items ?? [];
+                    const filtered = items.filter((m) => m._id !== messageId);
+                    return {
+                        messages: {
+                            ...state.messages,
+                            [conversationId]: {
+                                ...state.messages[conversationId],
+                                items: filtered,
+                            },
+                        },
+                    };
+                });
             },
 
             updateConversation: (conversation) => {

@@ -74,6 +74,22 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             useChatStore.getState().updateConversation(updatedConversation);
         })
        
+        // message edited
+        socket.on('message:edited', ({ message }) => {
+            useChatStore.getState().updateMessage(message);
+        })
+
+        // message unsent for everyone
+        socket.on('message:unsent', ({ message }) => {
+            useChatStore.getState().updateMessage(message);
+        })
+
+        // message deleted for me (targeted to personal room)
+        socket.on('message:deletedForMe', ({ messageId, conversationId }) => {
+            // remove locally for current user
+            useChatStore.getState().removeMessageForUser(conversationId, messageId);
+        })
+       
 
         //read mess
         socket.on('read-messages', ({ conversation, lastMessage }) => {

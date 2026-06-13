@@ -136,3 +136,105 @@ export const uploadAttachment = async (req, res) => {
     return res.status(500).json({ message: "Lỗi upload" });
   }
 };
+
+// Edit message (only sender can edit)
+export const editMessage = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const userId = req.user._id;
+    const { content } = req.body;
+
+    if (!content) return res.status(400).json({ message: 'Content required' });
+
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: 'Message not found' });
+
+    if (message.senderId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Not allowed' });
+    }
+
+    message.content = content;
+    message.edited = true;
+    message.editedAt = new Date();
+
+    await message.save();
+
+    // If this message was the last message of the conversation, update conversation
+    const conversation = await Conversation.findById(message.conversationId);
+    if (conversation && conversation.lastMessage?._id?.toString() === message._id.toString()) {
+      conversation.lastMessage.content = message.content;
+      await conversation.save();
+    }
+
+    // emit to conversation room
+    io.to(message.conversationId.toString()).emit('message:edited', { message });
+
+    return res.json({ message });
+  } catch (error) {
+    console.error('Error editing message', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete message only for current user
+export const deleteMessageForMe = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: 'Message not found' });
+
+    // Add to deletedBy if not already
+    const already = (message.deletedBy || []).some((id) => id.toString() === userId.toString());
+    if (!already) {
+      message.deletedBy = [...(message.deletedBy || []), userId];
+      await message.save();
+    }
+
+    // notify only the requesting user (personal room)
+    io.to(userId.toString()).emit('message:deletedForMe', { messageId, conversationId: message.conversationId });
+
+    return res.json({ ok: true });
+  } catch (error) {
+    console.error('Error deleting message for me', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Unsend (for everyone) - only sender
+export const unsendMessageForEveryone = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+    const userId = req.user._id;
+
+    const message = await Message.findById(messageId);
+    if (!message) return res.status(404).json({ message: 'Message not found' });
+
+    if (message.senderId.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Not allowed' });
+    }
+
+    message.content = 'You unsent a message';
+    message.unsent = true;
+    message.edited = false;
+    message.editedAt = undefined;
+
+    await message.save();
+
+    // update conversation lastMessage if needed
+    const conversation = await Conversation.findById(message.conversationId);
+    if (conversation && conversation.lastMessage?._id?.toString() === message._id.toString()) {
+      conversation.lastMessage.content = message.content;
+      await conversation.save();
+    }
+
+    // broadcast to all participants in conversation
+    io.to(message.conversationId.toString()).emit('message:unsent', { message });
+
+    return res.json({ message });
+  } catch (error) {
+    console.error('Error unsending message', error);
+    return res.status(500).json({ message: 'Server error' });
+  }
+};

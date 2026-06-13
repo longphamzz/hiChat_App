@@ -19,6 +19,26 @@ const messageSchema = new mongoose.Schema({
     imgUrl: {
         type: String,
     },
+    // new fields for message actions
+    edited: {
+        type: Boolean,
+        default: false,
+    },
+    editedAt: {
+        type: Date,
+    },
+    // users who deleted this message for themselves
+    deletedBy: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ],
+    // message was unsent (content replaced for everyone)
+    unsent: {
+        type: Boolean,
+        default: false,
+    },
 } ,  {
     timestamps: true
 }
