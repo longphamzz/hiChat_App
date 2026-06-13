@@ -70,12 +70,13 @@ const MessageItem = ({
         >
           <Card
             className={cn(
-              "p-3",
+              // if this message only contains an attachment, remove extra padding
+              message.imgUrl && !message.content ? 'p-0' : 'p-3',
               message.isOwn ? "chat-bubble-sent border-0" : "chat-bubble-received"
             )}
           >
             {message.imgUrl ? (
-              <div className="space-y-2">
+              <div className={message.content ? 'space-y-2' : ''}>
                 <MessageAttachment url={message.imgUrl} />
                 {message.content && (
                   <p className="text-sm leading-relaxed break-words">{message.content}</p>
