@@ -14,6 +14,7 @@ export const useChatStore = create<ChatState>()(
             convoLoading: false, //convo loading
             messageLoading: false,
             loading: false,
+            typingUsers: {},
 
             setActiveConversation: (id) => set({ activeConversationId: id }),
             reset: () => {
@@ -23,6 +24,7 @@ export const useChatStore = create<ChatState>()(
                     activeConversationId: null,
                     convoLoading: false,
                     messageLoading: false,
+                    typingUsers: {},
                 });
             },
             fetchConversations: async () => {
@@ -278,6 +280,34 @@ export const useChatStore = create<ChatState>()(
                 } finally {
                     set({ loading: false })
                 }
+            },
+
+            setTypingUser: (conversationId, typingUser) => {
+                set((state) => {
+                    const existing = state.typingUsers[conversationId] ?? [];
+                    if (existing.some((u) => u._id === typingUser._id)) return {};
+
+                    return {
+                        typingUsers: {
+                            ...state.typingUsers,
+                            [conversationId]: [...existing, typingUser],
+                        },
+                    };
+                });
+            },
+
+            removeTypingUser: (conversationId, userId) => {
+                set((state) => {
+                    const existing = state.typingUsers[conversationId];
+                    if (!existing) return {};
+
+                    return {
+                        typingUsers: {
+                            ...state.typingUsers,
+                            [conversationId]: existing.filter((u) => u._id !== userId),
+                        },
+                    };
+                });
             }
 
         }),
