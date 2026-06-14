@@ -6,6 +6,7 @@ import { ImagePlus, Mic, Send } from 'lucide-react';
 import { Input } from '../ui/input';
 import EmojiPicker from './EmojiPicker';
 import { useChatStore } from '@/stores/useChatStore';
+import { useSocketStore } from '@/stores/useSocketStore';
 import { toast } from 'sonner';
 import { chatService } from '@/services/chatService';
 
@@ -22,7 +23,49 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordTimerRef = useRef<number | null>(null);
+  const typingTimeoutRef = useRef<number | null>(null);
+  const isTypingRef = useRef(false);
 
+  const emitTyping = () => {
+    const socket = useSocketStore.getState().socket;
+    if (!socket) return;
+
+    if (!isTypingRef.current) {
+      isTypingRef.current = true;
+      socket.emit('typing', { conversationId: selectedConvo._id });
+    }
+
+    if (typingTimeoutRef.current) window.clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = window.setTimeout(() => {
+      isTypingRef.current = false;
+      socket.emit('stop-typing', { conversationId: selectedConvo._id });
+    }, 2000);
+  };
+
+  const stopTyping = () => {
+    if (typingTimeoutRef.current) {
+      window.clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = null;
+    }
+    if (isTypingRef.current) {
+      isTypingRef.current = false;
+      useSocketStore.getState().socket?.emit('stop-typing', { conversationId: selectedConvo._id });
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setValue(e.target.value);
+    if (e.target.value.trim()) emitTyping();
+    else stopTyping();
+  };
+
+  // stop typing when switching conversation or unmounting
+  useEffect(() => {
+    return () => {
+      stopTyping();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedConvo._id]);
 
   if (!user) return;
 
@@ -30,6 +73,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
     if(!value.trim()) return;
     const currValue = value;
     setValue("");
+    stopTyping();
 
     try {
       if(selectedConvo.type === 'direct'){
@@ -173,7 +217,7 @@ const MessageInput = ({ selectedConvo }: { selectedConvo: Conversation }) => {
       </>
       <div className='flex-1 relative'>
         <Input  onKeyPress={handleKeyPress}
-        value={value} onChange={(e) => setValue(e.target.value)}
+        value={value} onChange={handleChange}
           placeholder='...'
           className='pr-20 h-9 bg-white border-border/50 focus:border-primary/50 transition-smooth resize-none'
         >

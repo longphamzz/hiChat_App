@@ -9,11 +9,12 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
+  SidebarInput,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Search, Sun } from "lucide-react"
 import { Switch } from "../ui/switch"
 import CreateNewChat from "../chat/CreateNewChat"
 import NewGroupChatModel from "../chat/NewGroupChatModel"
@@ -22,6 +23,7 @@ import AddFriendModal from "../chat/AddFriendModal"
 import DirectMessageList from "../chat/DirectMessageList"
 import { useThemeStore } from "@/stores/useThemeStore"
 import { useAuthStore } from "@/stores/useAuthStore"
+import { useChatStore } from "@/stores/useChatStore"
 
 
 
@@ -29,6 +31,7 @@ import { useAuthStore } from "@/stores/useAuthStore"
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isDark, toggleTheme } = useThemeStore();
   const { user } = useAuthStore();
+  const { searchQuery, setSearchQuery } = useChatStore();
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -66,6 +69,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <CreateNewChat />
 
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Search conversations  */}
+        <SidebarGroup className="py-0">
+          <SidebarGroupContent>
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <SidebarInput
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Tìm theo tên người dùng, nhóm..."
+                className="pl-8"
+              />
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
 

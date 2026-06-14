@@ -1,5 +1,5 @@
 import type { Socket } from "socket.io-client";
-import type { Conversation, Message } from "./chat";
+import type { Conversation, Message, TypingUser } from "./chat";
 import type { Friend, FriendRequest, User } from "./user";
 
 
@@ -41,7 +41,9 @@ export interface ChatState {
     activeConversationId: string | null;
     convoLoading: boolean;
     messageLoading: boolean;
-    loading: boolean;  
+    loading: boolean;
+    typingUsers: Record<string, TypingUser[]>; // key = conversationId
+    searchQuery: string;
     reset: () => void;
 
     setActiveConversation: (id: string | null) => void;
@@ -70,6 +72,12 @@ export interface ChatState {
     addConvo:(convo: Conversation) => void;
     createConversation: (type: 'group' | 'direct', name: string, memberIds: string[]) => Promise<void>; 
 
+    //typing indicator
+    setTypingUser: (conversationId: string, user: TypingUser) => void;
+    removeTypingUser: (conversationId: string, userId: string) => void;
+
+    //search conversations by username / group name
+    setSearchQuery: (query: string) => void;
 }
 
 export interface SocketState {

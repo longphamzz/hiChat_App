@@ -296,6 +296,14 @@ export const addMembers = async (req, res) => {
             system: true
         });
 
+        // make the system message the conversation's latest message
+        await Conversation.findByIdAndUpdate(conversationId, {
+            $set: {
+                lastMessage: { _id: sysMsg._id, content: sysMsg.content, senderId: userId, createdAt: sysMsg.createdAt },
+                lastMessageAt: sysMsg.createdAt,
+            }
+        });
+
         // populate conversation to send to clients
         const updatedConversation = await Conversation.findById(conversationId)
             .populate({ path: 'participants.userId', select: 'displayName avatarUrl' })
@@ -320,11 +328,16 @@ export const addMembers = async (req, res) => {
             io.to(t.userId.toString()).emit('new-group', formatted);
         });
 
-        // also emit system message to room in the same shape frontend expects
-        io.to(conversationId).emit('new-message', {
+        // emit system message to every member so all of them — including newly
+        // added members who have not joined the conversation room yet — see it
+        const newMessagePayload = {
             message: sysMsg,
             conversation: formatted,
             unreadCounts: updatedConversation.unreadCounts || {}
+        };
+        io.to(conversationId).emit('new-message', newMessagePayload);
+        (formatted.participants || []).forEach((p) => {
+            if (p?._id) io.to(p._id.toString()).emit('new-message', newMessagePayload);
         });
 
         return res.status(200).json({ conversation: formatted, added: addedUsers });
@@ -388,6 +401,14 @@ export const removeMembers = async (req, res) => {
             system: true
         });
 
+        // make the system message the conversation's latest message
+        await Conversation.findByIdAndUpdate(conversationId, {
+            $set: {
+                lastMessage: { _id: sysMsg._id, content: sysMsg.content, senderId: userId, createdAt: sysMsg.createdAt },
+                lastMessageAt: sysMsg.createdAt,
+            }
+        });
+
         const updatedConversation = await Conversation.findById(conversationId)
             .populate({ path: 'participants.userId', select: 'displayName avatarUrl' })
             .populate({ path: 'lastMessage.senderId', select: 'displayName avatarUrl' })
@@ -402,6 +423,7 @@ export const removeMembers = async (req, res) => {
 
         const formatted = { ...updatedConversation.toObject(), participants };
 
+        const { io } = await import('../socket/index.js');
         io.to(conversationId).emit('group-member-removed', { conversation: formatted, removed: removedUsers });
 
         // notify removed users so they can remove group from their sidebar
