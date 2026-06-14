@@ -15,6 +15,7 @@ export const useChatStore = create<ChatState>()(
             messageLoading: false,
             loading: false,
             typingUsers: {},
+            searchQuery: '',
 
             setActiveConversation: (id) => set({ activeConversationId: id }),
             reset: () => {
@@ -25,6 +26,7 @@ export const useChatStore = create<ChatState>()(
                     convoLoading: false,
                     messageLoading: false,
                     typingUsers: {},
+                    searchQuery: '',
                 });
             },
             fetchConversations: async () => {
@@ -308,7 +310,9 @@ export const useChatStore = create<ChatState>()(
                         },
                     };
                 });
-            }
+            },
+
+            setSearchQuery: (searchQuery) => set({ searchQuery }),
 
         }),
         {

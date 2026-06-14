@@ -43,6 +43,7 @@ export interface ChatState {
     messageLoading: boolean;
     loading: boolean;
     typingUsers: Record<string, TypingUser[]>; // key = conversationId
+    searchQuery: string;
     reset: () => void;
 
     setActiveConversation: (id: string | null) => void;
@@ -74,6 +75,9 @@ export interface ChatState {
     //typing indicator
     setTypingUser: (conversationId: string, user: TypingUser) => void;
     removeTypingUser: (conversationId: string, userId: string) => void;
+
+    //search conversations by username / group name
+    setSearchQuery: (query: string) => void;
 }
 
 export interface SocketState {
