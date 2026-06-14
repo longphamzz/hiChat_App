@@ -219,11 +219,18 @@ export const useChatStore = create<ChatState>()(
             },
 
             updateConversation: (conversation) => {
-                set((state) => ({
-                    conversations: state.conversations.map((c) =>
+                set((state) => {
+                    const merged = state.conversations.map((c) =>
                         c._id === conversation._id ? { ...c, ...conversation } : c
-                    ),
-                }));
+                    );
+                    // keep conversations ordered by most recent activity so a new
+                    // message bumps its conversation to the top of the list
+                    merged.sort(
+                        (a, b) =>
+                            new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+                    );
+                    return { conversations: merged };
+                });
             },
 
             markAsSeen: async () => {
