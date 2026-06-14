@@ -9,7 +9,6 @@ import { useEffect } from 'react';
 import { useAuthStore } from './stores/useAuthStore';
 import { useSocketStore } from './stores/useSocketStore';
 import IncomingCallModal from './components/call/IncomingCallModal';
-import CallDialog from './components/call/CallDialog';
 import VideoCallScreen from './components/call/VideoCallScreen';
 
 function App() {
@@ -50,7 +49,6 @@ function App() {
     </BrowserRouter>
     {/* Global call UI */}
     <IncomingCallModal />
-    <CallDialog />
     <VideoCallScreen />
     </>
   )
