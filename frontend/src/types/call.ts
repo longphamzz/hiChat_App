@@ -9,4 +9,4 @@ export interface CallInfo {
   metadata?: any;
 }
 
-export type CallStatus = 'idle' | 'calling' | 'ringing' | 'connected' | 'ended' | 'rejected' | 'missed';
+export type CallStatus = 'idle' | 'calling' | 'ringing' | 'connecting' | 'connected' | 'ended' | 'rejected' | 'missed';

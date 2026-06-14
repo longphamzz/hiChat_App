@@ -4,6 +4,7 @@ import { SidebarInset } from "../ui/sidebar";
 import ChatWindowHeader from "./ChatWindowHeader";
 import ChatWindowBody from "./ChatWindowBody";
 import MessageInput from "./MessageInput";
+import TypingIndicator from "./TypingIndicator";
 import { useEffect } from "react";
 
 
@@ -46,6 +47,9 @@ const ChatWindowLayout = () => {
       <ChatWindowBody />
 
     </div>
+
+    {/* typing indicator  */}
+    <TypingIndicator conversationId={selectedConvo._id} isGroup={selectedConvo.type === 'group'} />
 
     {/* footer  */}
     <MessageInput selectedConvo={selectedConvo} />

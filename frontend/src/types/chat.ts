@@ -45,6 +45,11 @@ export interface ConversationResponse {
   conversations: Conversation[];
 }
 
+export interface TypingUser {
+  _id: string;
+  displayName: string;
+}
+
 export interface Message {
   _id: string;
   conversationId: string;

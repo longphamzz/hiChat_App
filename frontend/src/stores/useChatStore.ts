@@ -14,6 +14,8 @@ export const useChatStore = create<ChatState>()(
             convoLoading: false, //convo loading
             messageLoading: false,
             loading: false,
+            typingUsers: {},
+            searchQuery: '',
 
             setActiveConversation: (id) => set({ activeConversationId: id }),
             reset: () => {
@@ -23,6 +25,8 @@ export const useChatStore = create<ChatState>()(
                     activeConversationId: null,
                     convoLoading: false,
                     messageLoading: false,
+                    typingUsers: {},
+                    searchQuery: '',
                 });
             },
             fetchConversations: async () => {
@@ -215,11 +219,18 @@ export const useChatStore = create<ChatState>()(
             },
 
             updateConversation: (conversation) => {
-                set((state) => ({
-                    conversations: state.conversations.map((c) =>
+                set((state) => {
+                    const merged = state.conversations.map((c) =>
                         c._id === conversation._id ? { ...c, ...conversation } : c
-                    ),
-                }));
+                    );
+                    // keep conversations ordered by most recent activity so a new
+                    // message bumps its conversation to the top of the list
+                    merged.sort(
+                        (a, b) =>
+                            new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
+                    );
+                    return { conversations: merged };
+                });
             },
 
             markAsSeen: async () => {
@@ -278,7 +289,37 @@ export const useChatStore = create<ChatState>()(
                 } finally {
                     set({ loading: false })
                 }
-            }
+            },
+
+            setTypingUser: (conversationId, typingUser) => {
+                set((state) => {
+                    const existing = state.typingUsers[conversationId] ?? [];
+                    if (existing.some((u) => u._id === typingUser._id)) return {};
+
+                    return {
+                        typingUsers: {
+                            ...state.typingUsers,
+                            [conversationId]: [...existing, typingUser],
+                        },
+                    };
+                });
+            },
+
+            removeTypingUser: (conversationId, userId) => {
+                set((state) => {
+                    const existing = state.typingUsers[conversationId];
+                    if (!existing) return {};
+
+                    return {
+                        typingUsers: {
+                            ...state.typingUsers,
+                            [conversationId]: existing.filter((u) => u._id !== userId),
+                        },
+                    };
+                });
+            },
+
+            setSearchQuery: (searchQuery) => set({ searchQuery }),
 
         }),
         {

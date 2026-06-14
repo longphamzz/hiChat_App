@@ -36,6 +36,9 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         socket.on("new-message", async ({message, conversation, unreadCounts}) => {
             useChatStore.getState().addMessage(message);
 
+            // a user who just sent a message is no longer typing
+            useChatStore.getState().removeTypingUser(message.conversationId, message.senderId);
+
             const lastMessage = {
                 _id: conversation.lastMessage._id,
                 content: conversation.lastMessage.content,
@@ -140,6 +143,15 @@ export const useSocketStore = create<SocketState>((set, get) => ({
                     activeConversationId: state.activeConversationId === conversationId ? null : state.activeConversationId,
                 }));
             }
+        })
+
+        // typing indicators
+        socket.on('typing', ({ conversationId, user }) => {
+            useChatStore.getState().setTypingUser(conversationId, user);
+        })
+
+        socket.on('stop-typing', ({ conversationId, user }) => {
+            useChatStore.getState().removeTypingUser(conversationId, user._id);
         })
 
         // friend request

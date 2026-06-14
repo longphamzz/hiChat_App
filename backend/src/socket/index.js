@@ -47,6 +47,23 @@ io.on("connection", async (socket) => {
         socket.join(conversationId);
         console.log(`User ${user.displayName} joined new room: ${conversationId}`);
     });
+
+    // ---------- Typing indicators ----------
+    socket.on("typing", ({ conversationId }) => {
+        if (!conversationId) return;
+        socket.to(conversationId).emit("typing", {
+            conversationId,
+            user: { _id: user._id, displayName: user.displayName },
+        });
+    });
+
+    socket.on("stop-typing", ({ conversationId }) => {
+        if (!conversationId) return;
+        socket.to(conversationId).emit("stop-typing", {
+            conversationId,
+            user: { _id: user._id },
+        });
+    });
    
 
     // ---------- Call signaling handlers ----------
