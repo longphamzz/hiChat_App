@@ -10,7 +10,7 @@ import { chatService } from '@/services/chatService';
 interface AddMemberDialogProps {
   conversationId: string;
   onClose?: () => void;
-  asPanel?: boolean; // when true, render inner panel without DialogContent wrapper
+  asPanel?: boolean; 
 }
 
 const AddMemberDialog: React.FC<AddMemberDialogProps> = ({ conversationId, onClose, asPanel = false }) => {

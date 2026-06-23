@@ -8,11 +8,11 @@ const SignUpPage = () => {
     //         <SignupForm />
     //       </div>
     //     </div>
-        <div className="flex min-h-screen items-center justify-center bg-muted p-6 md:p-10">
-  <div className="w-full max-w-4xl">
-    <SignupForm />
-  </div>
-</div>
+    <div className="flex min-h-screen items-center justify-center bg-muted p-6 md:p-10">
+      <div className="w-full max-w-4xl">
+        <SignupForm />
+      </div>
+    </div>
   )
 }
 

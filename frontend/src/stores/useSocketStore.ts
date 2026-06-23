@@ -113,16 +113,13 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             socket.emit('join-conversation', conversation._id);
         })
 
-        // group members added
         socket.on('group-member-added', ({ conversation, added }) => {
-            // update conversation participants and metadata
             useChatStore.getState().updateConversation(conversation);
 
             const user = useAuthStore.getState().user;
             const amAdded = Array.isArray(added) && added.some((u: any) => u._id === user?._id);
 
             if (amAdded) {
-                // if current user was added, ensure conversation appears and join room
                 useChatStore.getState().addConvo(conversation);
                 socket.emit('join-conversation', conversation._id);
             }
@@ -133,9 +130,7 @@ export const useSocketStore = create<SocketState>((set, get) => ({
             useChatStore.getState().updateConversation(conversation);
         })
 
-        // group removed (for users removed from group)
         socket.on('group-removed', ({ conversationId }) => {
-            // remove conversation from store if present
             const exists = useChatStore.getState().conversations.some((c) => c._id === conversationId);
             if (exists) {
                 useChatStore.setState((state) => ({
@@ -156,7 +151,6 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
         // friend request
         socket.on('friend-request', async () => {
-            // refresh friend requests list so UI updates
             try {
                 await useFriendStore.getState().getAllFriendRequests();
             } catch (err) {
