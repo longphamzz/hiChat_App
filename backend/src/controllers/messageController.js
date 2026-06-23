@@ -137,7 +137,6 @@ export const uploadAttachment = async (req, res) => {
   }
 };
 
-// Edit message (only sender can edit)
 export const editMessage = async (req, res) => {
   try {
     const messageId = req.params.id;
@@ -176,7 +175,6 @@ export const editMessage = async (req, res) => {
   }
 };
 
-// Delete message only for current user
 export const deleteMessageForMe = async (req, res) => {
   try {
     const messageId = req.params.id;
@@ -202,7 +200,6 @@ export const deleteMessageForMe = async (req, res) => {
   }
 };
 
-// Unsend (for everyone) - only sender
 export const unsendMessageForEveryone = async (req, res) => {
   try {
     const messageId = req.params.id;

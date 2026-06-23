@@ -40,7 +40,6 @@ io.on("connection", async (socket) => {
         socket.join(id);
     });
 
-    // join personal room for direct targeting
     socket.join(user._id.toString());
 
     socket.on("join-conversation", (conversationId) => { 
@@ -48,7 +47,6 @@ io.on("connection", async (socket) => {
         console.log(`User ${user.displayName} joined new room: ${conversationId}`);
     });
 
-    // ---------- Typing indicators ----------
     socket.on("typing", ({ conversationId }) => {
         if (!conversationId) return;
         socket.to(conversationId).emit("typing", {
@@ -66,16 +64,12 @@ io.on("connection", async (socket) => {
     });
    
 
-    // ---------- Call signaling handlers ----------
-    // Caller initiates a call to `to` (userId) with type 'voice' | 'video'
     socket.on('call-user', ({ to, callType, metadata }, cb) => {
         try {
             console.log(`socket:call-user from ${user._id} to ${to} type=${callType}`);
             const targetSocket = getSocketIdByUserId(to);
             const callId = `${socket.id}-${Date.now()}`;
-            // send incoming-call to callee
             console.log(`found target socket ${targetSocket}`);
-            // emit to the user's personal room (room name = userId)
             io.to(to).emit('incoming-call', {
                 callId,
                 from: user._id,
@@ -85,7 +79,6 @@ io.on("connection", async (socket) => {
                 startedAt: new Date(),
             });
 
-            // also emit directly to the specific socket id if available
             if (targetSocket) {
                 io.to(targetSocket).emit('incoming-call', {
                     callId,
@@ -97,7 +90,6 @@ io.on("connection", async (socket) => {
                 });
             }
 
-            // ack back to caller with callId
             if (cb) cb({ ok: true, callId });
         } catch (err) {
             console.error('call-user error', err);
@@ -106,7 +98,6 @@ io.on("connection", async (socket) => {
     });
 
     socket.on('accept-call', ({ callId, to }) => {
-        // callee accepted: notify caller
         io.to(to).emit('accept-call', { callId, from: user._id });
     });
 
@@ -114,7 +105,6 @@ io.on("connection", async (socket) => {
         io.to(to).emit('reject-call', { callId, from: user._id });
     });
 
-    // WebRTC signaling passthrough
     socket.on('offer', ({ to, offer, callId }) => {
         io.to(to).emit('offer', { from: user._id, offer, callId });
     });
@@ -127,12 +117,10 @@ io.on("connection", async (socket) => {
         io.to(to).emit('ice-candidate', { from: user._id, candidate, callId });
     });
 
-    // end call: status can be 'completed'|'missed'|'rejected' with duration seconds
     socket.on('end-call', async ({ callId, to, status = 'completed', duration = 0, startedAt, endedAt, callType, otherUser }) => {
-        // notify peer
+        
         if (to) io.to(to).emit('end-call', { callId, from: user._id, status, duration });
 
-        // persist call history if data provided
         try {
             if (otherUser) {
                 await CallHistory.create({

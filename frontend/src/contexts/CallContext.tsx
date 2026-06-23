@@ -25,8 +25,6 @@ const CallContext = createContext<CallContextValue | undefined>(undefined);
 export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const socket = useSocketStore((s) => s.socket);
   const webrtc = useWebRTC();
-  // keep a stable ref to the latest webrtc helpers so socket handlers
-  // (registered once per socket) always use current functions/refs
   const webrtcRef = useRef(webrtc);
   webrtcRef.current = webrtc;
 
@@ -65,7 +63,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setStatus('ringing');
     });
 
-    // callee accepted -> caller creates the offer using the ORIGINAL call type
     socket.on('accept-call', async ({ callId, from }) => {
       remoteUserRef.current = from;
       setRemoteUserId(from);
@@ -76,8 +73,11 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const local = await webrtcRef.current.createLocalStream(type);
       setLocalStreamState(local);
       const pc = webrtcRef.current.createPeer(
+
         from,
-        (s) => setRemoteStreamState(s),
+        (s) => {
+          console.log("REMOTE STREAM RECEIVED", s);
+          setRemoteStreamState(s)},
         (candidate) => socket.emit('ice-candidate', { to: from, candidate, callId })
       );
       const offer = await webrtcRef.current.createOffer(from, pc);
@@ -89,7 +89,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       resetCallState();
     });
 
-    // callee receives the offer -> answer using the incoming call's type
     socket.on('offer', async ({ from, offer, callId }) => {
       remoteUserRef.current = from;
       setRemoteUserId(from);
@@ -157,7 +156,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
-    // record the call type up front so the accept-call handler can reuse it
     callRef.current = { callId: '', from: '', callType: type } as CallInfo;
     remoteUserRef.current = to;
     setRemoteUserId(to);
@@ -176,7 +174,6 @@ export const CallProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const acceptCall = async () => {
     if (!socket || !incomingCall) return;
     socket.emit('accept-call', { callId: incomingCall.callId, to: incomingCall.from });
-    // offer/answer flow will create streams and move status to 'connected'
     setStatus('connecting');
     setIncomingCall(null);
   };
