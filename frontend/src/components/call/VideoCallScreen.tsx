@@ -86,11 +86,13 @@ export default function VideoCallScreen() {
     else document.exitFullscreen().catch(() => { });
   };
 
+  console.log("DEBUG STREAM:", { isVideo, status, hasRemoteStream: !!remoteStream });
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95">
       <div
         ref={containerRef}
-        className="relative h-full w-full overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
+        className="relative flex h-full w-full overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
       >
         {/* Remote video element is always mounted so call audio plays even for voice calls */}
         <video

@@ -93,11 +93,7 @@ export function NavUser({
                 />
                 Tài Khoản
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <CreditCardIcon
-                />
-                Billing
-              </DropdownMenuItem>
+             
               <DropdownMenuItem
               onClick={() => setFriendRequestOpen(true)}
               >
