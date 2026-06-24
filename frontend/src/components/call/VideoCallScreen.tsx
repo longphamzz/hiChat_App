@@ -86,8 +86,6 @@ export default function VideoCallScreen() {
     else document.exitFullscreen().catch(() => { });
   };
 
-  console.log("DEBUG STREAM:", { isVideo, status, hasRemoteStream: !!remoteStream });
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95">
       <div
