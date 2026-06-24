@@ -69,29 +69,29 @@ export const useChatStore = create<ChatState>()(
                     }));
 
                     set((state) => {
-                            const prev = state.messages[convoId]?.items ?? [];
-                            const merged = prev.length > 0 ? [...processed, ...prev] : processed;
+                        const prev = state.messages[convoId]?.items ?? [];
+                        const merged = prev.length > 0 ? [...processed, ...prev] : processed;
 
-                            // deduplicate by _id, preserve order (first occurrence wins)
-                            const seen = new Set();
-                            const unique = [];
-                            for (const m of merged) {
-                                if (!seen.has(m._id)) {
-                                    seen.add(m._id);
-                                    unique.push(m);
-                                }
+                        // deduplicate by _id, preserve order (first occurrence wins)
+                        const seen = new Set();
+                        const unique = [];
+                        for (const m of merged) {
+                            if (!seen.has(m._id)) {
+                                seen.add(m._id);
+                                unique.push(m);
                             }
+                        }
 
-                            return {
-                                messages: {
-                                    ...state.messages,
-                                    [convoId]: {
-                                        items: unique,
-                                        hasMore: !!cursor,
-                                        nextCursor: cursor ?? null,
-                                    },
+                        return {
+                            messages: {
+                                ...state.messages,
+                                [convoId]: {
+                                    items: unique,
+                                    hasMore: !!cursor,
+                                    nextCursor: cursor ?? null,
                                 },
-                            };
+                            },
+                        };
                     });
                 } catch (error) {
 
@@ -155,27 +155,27 @@ export const useChatStore = create<ChatState>()(
                     }
 
                     set((state) => {
-                            // merge prevItems and new message, dedupe by _id
-                            const combined = [...prevItems, message];
-                            const seen = new Set();
-                            const unique = [];
-                            for (const m of combined) {
-                                if (!seen.has(m._id)) {
-                                    seen.add(m._id);
-                                    unique.push(m);
-                                }
+                        // merge prevItems and new message, dedupe by _id
+                        const combined = [...prevItems, message];
+                        const seen = new Set();
+                        const unique = [];
+                        for (const m of combined) {
+                            if (!seen.has(m._id)) {
+                                seen.add(m._id);
+                                unique.push(m);
                             }
+                        }
 
-                            return {
-                                messages: {
-                                    ...state.messages,
-                                    [convoId]: {
-                                        items: unique,
-                                        hasMore: state.messages[convoId]?.hasMore,
-                                        nextCursor: state.messages[convoId]?.nextCursor ?? undefined,
-                                    }
+                        return {
+                            messages: {
+                                ...state.messages,
+                                [convoId]: {
+                                    items: unique,
+                                    hasMore: state.messages[convoId]?.hasMore,
+                                    nextCursor: state.messages[convoId]?.nextCursor ?? undefined,
                                 }
                             }
+                        }
                     })
 
                 } catch (error) {

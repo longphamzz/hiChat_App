@@ -45,14 +45,14 @@ export default function VideoCallScreen() {
     if (localRef.current && localStream) {
       localRef.current.srcObject = localStream;
       localRef.current.muted = true;
-      localRef.current.play().catch(() => {});
+      localRef.current.play().catch(() => { });
     }
   }, [localStream]);
 
   useEffect(() => {
     if (remoteRef.current && remoteStream) {
       remoteRef.current.srcObject = remoteStream;
-      remoteRef.current.play().catch(() => {});
+      remoteRef.current.play().catch(() => { });
     }
   }, [remoteStream]);
 
@@ -76,14 +76,14 @@ export default function VideoCallScreen() {
 
   const statusText =
     status === 'calling' ? 'Đang gọi...' :
-    status === 'connecting' ? 'Đang kết nối...' :
-    formatDuration(seconds);
+      status === 'connecting' ? 'Đang kết nối...' :
+        formatDuration(seconds);
 
   const showRemoteVideo = isVideo && status === 'connected' && Boolean(remoteStream);
 
   const toggleFullscreen = () => {
-    if (!document.fullscreenElement) containerRef.current?.requestFullscreen().catch(() => {});
-    else document.exitFullscreen().catch(() => {});
+    if (!document.fullscreenElement) containerRef.current?.requestFullscreen().catch(() => { });
+    else document.exitFullscreen().catch(() => { });
   };
 
   return (
@@ -97,7 +97,9 @@ export default function VideoCallScreen() {
           ref={remoteRef}
           autoPlay
           playsInline
-          className={`h-full w-full object-cover ${showRemoteVideo ? 'opacity-100' : 'opacity-0'}`}
+          // className={`h-full w-full object-cover ${showRemoteVideo ? 'opacity-100' : 'opacity-0'}`}
+          className={`h-full object-cover transition-all duration-300 ${showRemoteVideo ? 'w-1/2 border-r border-white/10' : 'w-full opacity-0'
+            }`}
         />
 
         {/* Avatar / status overlay (voice calls, or before remote video arrives) */}
@@ -124,11 +126,24 @@ export default function VideoCallScreen() {
 
         {/* Local preview (video calls only) */}
         {isVideo && (
-          <div className="absolute right-4 top-4 h-40 w-28 overflow-hidden rounded-xl border border-white/20 bg-black/60 shadow-lg sm:h-44 sm:w-32">
+          // <div className="absolute right-4 top-4 h-40 w-28 overflow-hidden rounded-xl border border-white/20 bg-black/60 shadow-lg sm:h-44 sm:w-32">
+          //   <video ref={localRef} autoPlay playsInline muted className="h-full w-full object-cover" />
+          //   {!camOn && (
+          //     <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white/70">
+          //       <VideoOff className="size-6" />
+          //     </div>
+          //   )}
+          // </div>
+          <div
+            className={`overflow-hidden bg-black/60 transition-all duration-300 ${showRemoteVideo
+                ? 'relative h-full w-1/2' // Khi có video B: Nằm cạnh bên phải, full chiều cao
+                : 'absolute right-4 top-4 z-10 h-40 w-28 rounded-xl border border-white/20 shadow-lg sm:h-44 sm:w-32' // Khi chưa kết nối: Nằm góc nhỏ
+              }`}
+          >
             <video ref={localRef} autoPlay playsInline muted className="h-full w-full object-cover" />
             {!camOn && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/70 text-white/70">
-                <VideoOff className="size-6" />
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-900 text-white/70">
+                <VideoOff className="size-8" />
               </div>
             )}
           </div>
